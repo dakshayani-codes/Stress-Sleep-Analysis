@@ -73,21 +73,17 @@ Physiological features contributed ~60% of total importance; sleep features ~40%
 
 ---
 
-## Outputs Generated
+## Notebook Outputs
 
-Running the notebook produces:
+All figures and tables are rendered inline within the notebook and visible directly on GitHub:
 
-| Output | Description |
-|--------|-------------|
-| `figure1_feature_distributions.png` | Boxplots by stress label |
-| `figure2_roc_pr_curves.png` | ROC & PR curve comparison (3 modalities) |
-| `figure3_feature_importance.png` | Top 10 features + cumulative importance |
-| `figure4_fusion_optimization.png` | Fusion weight sweep (Physio:Sleep) |
-| `figure5_confusion_matrix.png` | Confusion matrix with clinical metrics |
-| `table_I_dataset_characteristics.csv` | Mean feature values by stress label |
-| `table_II_fold_performance.csv` | Per-fold CV metrics |
-| `all_metrics_summary.csv` | All final metrics |
-| `paper_results_summary.txt` | Full results report |
+- Feature distribution boxplots by stress label
+- ROC & PR curve comparison across 3 modalities (physiological, sleep, combined)
+- Top 10 feature importances + cumulative importance curve
+- Fusion weight optimization sweep (Physio:Sleep ratio)
+- Confusion matrix with clinical performance metrics (sensitivity, specificity, Cohen's Kappa)
+- Table I: Mean feature values by stress label with statistical significance
+- Table II: Per-fold cross-validation metrics (5 folds)
 
 ---
 
