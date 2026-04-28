@@ -1,124 +1,125 @@
-# Stress & Sleep Pattern Analysis using Wearable Sensor Data
+# Stress Detection Using Physiological & Sleep Patterns
 
-##  Project Status
-
-This project is currently **ongoing**.
-Core data analysis and preprocessing have been completed, and machine learning models for stress prediction are under development.
-
----
-
-##  Overview
-
-This project focuses on analyzing physiological data collected from wrist-based wearable devices to detect **stress levels** and evaluate **sleep patterns** using data mining and machine learning techniques.
-
-With the increasing use of wearable technology, this project aims to build a **data-driven framework** for continuous, non-intrusive monitoring of stress and sleep behavior.
+**Authors:** Dakshayani Sharma · Ridhima Verma · Samriddhi Saxena  
+**Institution:** Manipal Institute of Technology, Manipal — B.Tech Information Technology  
+**Format:** IEEE Research Paper (2025)
 
 ---
 
-##  Objectives
+## Overview
 
-* Analyze physiological signals such as heart rate, HRV, and activity data
-* Perform preprocessing and feature extraction on raw sensor data
-* Study sleep patterns including duration and quality
-* Predict stress levels (low, medium, high) using machine learning
-* Identify relationships between sleep behavior and stress
-* Evaluate model performance using standard metrics
+An end-to-end machine learning pipeline for non-intrusive stress detection using
+multimodal wearable sensor data. The system combines HRV (Heart Rate Variability)
+physiological signals with sleep diary behavioral data from 49 participants,
+using ensemble learning to classify stress based on GAD-7 survey ground truth.
 
 ---
 
-##  Dataset
+## Key Results
 
-This project uses publicly available wearable datasets:
+| Metric | Score | 95% CI |
+|--------|-------|--------|
+| ROC-AUC | 0.81 | ±0.04 |
+| PR-AUC | 0.74 | — |
+| F1-Score | 0.72 | — |
+| Recall | 0.76 | — |
 
-* **WESAD (Wearable Stress and Affect Detection Dataset)**
-* **MMASH (Multilevel Monitoring of Activity and Sleep in Healthy People)**
-
-Note:
-Datasets are not included in this repository due to size constraints.
-They can be accessed from their respective public sources.
-
----
-
-##  Technologies Used
-
-* **Python**
-* **Pandas, NumPy** (Data Processing)
-* **Matplotlib, Seaborn** (Visualization)
-* **Scikit-learn** (Machine Learning)
+Evaluated using 5-fold stratified cross-validation with bootstrap confidence intervals.
 
 ---
 
-##  Methodology
+## Dataset
 
-### 1. Data Preprocessing
+| Source | Records | Description |
+|--------|---------|-------------|
+| `sensor_hrv_filtered.csv` | 38,921 | HRV + instantaneous HR with Unix timestamps |
+| `sleep_diary.csv` | 1,372 | Sleep duration, latency, WASO, efficiency |
+| `survey.csv` | 49 participants | GAD-7 stress labels (score ≥ 10 = stressed) |
 
-* Handling missing values
-* Noise removal and normalization
-* Segmentation of time-series data
-
-### 2. Feature Extraction
-
-* Statistical features (mean, variance, std deviation)
-* Physiological features (HRV, activity levels)
-* Sleep-related features
-
-### 3. Exploratory Data Analysis (EDA)
-
-* Visualization of stress and sleep trends
-* Correlation analysis between variables
-
-### 4. Machine Learning (Ongoing)
-
-* Models being explored:
-
-  * Support Vector Machine (SVM)
-  * Random Forest
-  * K-Nearest Neighbors (KNN)
-* Evaluation metrics:
-
-  * Accuracy
-  * Precision, Recall
-  * F1-Score
+**Class distribution:** 16.7% stressed · 83.3% non-stressed (1:5 ratio)  
+Dataset not included in repo due to size. Available via original study authors.
 
 ---
 
-## 📂 Project Structure
+## Methodology
+
+### Feature Engineering
+- **Physiological (9 features):** Recovery index (RMSSD/HR), stress index (HR/RMSSD),
+  log-RMSSD, day-over-day HR delta, 3-day rolling means of HR and RMSSD, HR stats (min/max/std)
+- **Sleep (4 features):** Sleep duration (hours), sleep latency, WASO, sleep quality score (duration × efficiency)
+
+### Pipeline
+1. **Preprocessing** — Unix timestamp → date conversion, HRV daily aggregation, median imputation
+2. **Outlier Removal** — Isolation Forest (5% contamination, minority class preserved)
+3. **Class Imbalance** — SMOTE per fold + class weighting in both classifiers
+4. **Model** — Dual pipeline ensemble:
+   - XGBoost on physiological features (weight: 0.6)
+   - Random Forest (200 trees) on sleep features (weight: 0.4)
+   - Final: `prob = 0.6 × P_physio + 0.4 × P_sleep`
+5. **Threshold Selection** — Optimized per fold via Precision-Recall curve (max F1)
+6. **Validation** — 5-fold stratified CV + 1000-iteration bootstrap CIs
+
+---
+
+## Top Predictive Features
+
+| Rank | Feature | Type |
+|------|---------|------|
+| 1 | Recovery Index (RMSSD/HR) | Physiological |
+| 2 | RMSSD Mean | Physiological |
+| 3 | Sleep Latency | Sleep |
+
+Physiological features contributed ~60% of total importance; sleep features ~40%.
+
+---
+
+## Outputs Generated
+
+Running the notebook produces:
+
+| Output | Description |
+|--------|-------------|
+| `figure1_feature_distributions.png` | Boxplots by stress label |
+| `figure2_roc_pr_curves.png` | ROC & PR curve comparison (3 modalities) |
+| `figure3_feature_importance.png` | Top 10 features + cumulative importance |
+| `figure4_fusion_optimization.png` | Fusion weight sweep (Physio:Sleep) |
+| `figure5_confusion_matrix.png` | Confusion matrix with clinical metrics |
+| `table_I_dataset_characteristics.csv` | Mean feature values by stress label |
+| `table_II_fold_performance.csv` | Per-fold CV metrics |
+| `all_metrics_summary.csv` | All final metrics |
+| `paper_results_summary.txt` | Full results report |
+
+---
+
+## How to Run
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run via Jupyter
+jupyter notebook stress_sleep_analysis.ipynb
+```
+
+Update the dataset path in the notebook:
+```python
+DATASET_DIR = "/path/to/your/data"   # change this line
+```
+
+---
+
+## Tech Stack
+
+`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `XGBoost` · `imbalanced-learn` · `Matplotlib` · `Seaborn` · `SciPy`
+
+---
+
+## Project Structure
 
 ```
 Stress-Sleep-Analysis/
-│
-├── dataset/                 # (ignored in GitHub)
-├── stress_sleep_analysis.ipynb
-├── README.md
-└── .gitignore
+├── stress_sleep_analysis.ipynb   # Full ML pipeline
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
-
----
-
-##  Current Progress
-
-* ✅ Data loading and preprocessing completed
-* ✅ Exploratory Data Analysis performed
-* 🔄 Feature engineering in progress
-* 🔄 Machine learning models under implementation
-
----
-
-##  Future Work
-
-* Implement and compare multiple ML models
-* Improve feature engineering for better accuracy
-* Build a predictive system for real-time stress detection
-* Extend project towards healthcare applications
-
----
-
-##  Key Insight
-
-This project explores how **sleep patterns directly influence stress levels**, contributing toward better understanding of lifestyle-driven health issues.
-
-
-
-
-
-This project is part of ongoing work in **data mining and machine learning** and will be continuously improved with additional models and insights.
